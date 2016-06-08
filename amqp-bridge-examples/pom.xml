@@ -9,10 +9,31 @@
   <version>3.3.0-SNAPSHOT</version>
 
   <dependencies>
+    <!-- primary deps -->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-amqp-bridge</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <!-- language bindings -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-js</artifactId>
+      <version>${project.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-groovy</artifactId>
+      <version>${project.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-ruby</artifactId>
+      <version>${project.version}</version>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 
@@ -26,10 +47,6 @@
           <configuration>
             <source>1.8</source>
             <target>1.8</target>
-            <compilerArgs>
-              <arg>-Acodetrans.output=${project.basedir}/src/main</arg>
-              <arg>-Acodetrans.config=${basedir}/codetrans-config.json</arg>
-            </compilerArgs>
           </configuration>
         </plugin>
       </plugins>

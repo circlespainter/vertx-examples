@@ -15,10 +15,8 @@
 */
 package io.vertx.example.amqp;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import io.vertx.amqp.bridge.Bridge;
-import io.vertx.amqp.bridge.MessageHelper;
+import io.vertx.amqp.bridge.AmqpBridge;
+import io.vertx.amqp.bridge.AmqpConstants;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageProducer;
 import io.vertx.core.json.JsonObject;
@@ -26,11 +24,12 @@ import io.vertx.example.util.Runner;
 
 public class Sender extends AbstractVerticle {
 
-  private AtomicInteger count = new AtomicInteger();
+  private int count = 1;
 
   @Override
   public void start() throws Exception {
-    Bridge bridge = Bridge.bridge(vertx);
+    AmqpBridge bridge = AmqpBridge.create(vertx);
+
     // Start the bridge, then use the event loop thread to process things thereafter.
     bridge.start("localhost", 5672, res -> {
       if(!res.succeeded()) {
@@ -42,13 +41,14 @@ public class Sender extends AbstractVerticle {
       MessageProducer<JsonObject> producer = bridge.createProducer("myAmqpAddress");
 
       // Schedule sending of a message every second
+      System.out.println("Producer created, scheduling sends.");
       vertx.setPeriodic(1000, v -> {
-        JsonObject amqpPayload = new JsonObject();
-        String amqpBody = "myStringContent" + count.incrementAndGet();
-        amqpPayload.put(MessageHelper.BODY, amqpBody);
+        JsonObject amqpMsgPayload = new JsonObject();
+        amqpMsgPayload.put(AmqpConstants.BODY, "myStringContent" + count);
 
-        producer.send(amqpPayload);
-        System.out.println("Sent message: " + count.get());
+        producer.send(amqpMsgPayload);
+
+        System.out.println("Sent message: " + count++);
       });
     });
   }

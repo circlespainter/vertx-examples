@@ -15,8 +15,8 @@
 */
 package io.vertx.example.amqp;
 
-import io.vertx.amqp.bridge.Bridge;
-import io.vertx.amqp.bridge.MessageHelper;
+import io.vertx.amqp.bridge.AmqpBridge;
+import io.vertx.amqp.bridge.AmqpConstants;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
@@ -26,7 +26,8 @@ public class Receiver extends AbstractVerticle {
 
   @Override
   public void start() throws Exception {
-    Bridge bridge = Bridge.bridge(vertx);
+    AmqpBridge bridge = AmqpBridge.create(vertx);
+
     // Start the bridge, then use the event loop thread to process things thereafter.
     bridge.start("localhost", 5672, res -> {
       if(!res.succeeded()) {
@@ -37,11 +38,11 @@ public class Receiver extends AbstractVerticle {
       // Set up a consumer using the bridge, register a handler for it.
       MessageConsumer<JsonObject> consumer = bridge.createConsumer("myAmqpAddress");
       consumer.handler(vertxMsg -> {
-        JsonObject amqpPayload = vertxMsg.body();
-        Object amqpBody = amqpPayload.getValue(MessageHelper.BODY);
+        JsonObject amqpMsgPayload = vertxMsg.body();
+        Object amqpBody = amqpMsgPayload.getValue(AmqpConstants.BODY);
 
         // Print body of received AMQP message
-        System.out.println("Got msg with body content: " + amqpBody);
+        System.out.println("Received a message with body: " + amqpBody);
       });
     });
   }
