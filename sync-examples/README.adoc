@@ -54,7 +54,6 @@ Then open a browser and point it at `localhost:8080`. Ignore the `UnableToInstru
 
 == Fiber scheduler troubleshooting
 
-The `fiberhandler` example has been modified to set a ForkJoin scheduler rather than `vertx-sync`'s direct one. After you hit `http://localhost:8080` with a brower or HTTP client, you'll see on `stdout` a line stating: `[HTTPReqHandler] Running in a fiber, scheduler class: co.paralleluniverse.fibers.FiberForkJoinScheduler`.
-The stacktrace will show a regular fiber stacktrace of a task run by the .
+The `fiberhandler` example has been modified to set a fork-join scheduler rather than `vertx-sync`'s direct one. After you hit `http://localhost:8080` with a browser or HTTP client, you'll see on `stdout` a line stating: `[HTTPReqHandler] Running in a fiber, scheduler class: co.paralleluniverse.fibers.FiberForkJoinScheduler`. The stacktrace will show a regular fiber stacktrace of a task run by the fork-join scheduler.
 
-You can comment out the `vertx.getOrCreateContext().put(FIBER_SCHEDULER_CONTEXT_KEY, ...)` line in `fiberhandler/Server.java` in order to use the default direct scheduler, in that case you'll see on `stdout` a line stating: `[HTTPReqHandler] Running in a fiber, scheduler class: co.paralleluniverse.fibers.FiberExecutorScheduler`. The stacktrace will show a fiber started by `vertx-sync` and immediately being executed in the very same thread.
+You can comment out the `vertx.getOrCreateContext().put(FIBER_SCHEDULER_CONTEXT_KEY, ...)` line in `fiberhandler/Server.java` in order to use the default `vertx-sync` direct scheduler, in that case you'll see on `stdout` a line stating: `[HTTPReqHandler] Running in a fiber, scheduler class: co.paralleluniverse.fibers.FiberExecutorScheduler`. The stacktrace will show a fiber started by `vertx-sync` and immediately being executed in the very same thread.
