@@ -8,7 +8,29 @@
   <artifactId>sync-examples</artifactId>
   <version>3.2.1</version>
 
+  <properties>
+    <quasar.version>0.7.5</quasar.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>STS</id>
+      <name>SonaType Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <dependencies>
+    <!-- Override Quasar -->
+    <dependency>
+      <groupId>co.paralleluniverse</groupId>
+      <artifactId>quasar-core</artifactId>
+      <classifier>jdk8</classifier>
+      <version>${quasar.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>io.vertx</groupId>
@@ -70,49 +92,68 @@
       <artifactId>slf4j-api</artifactId>
       <version>1.7.21</version>
     </dependency>
-
   </dependencies>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <!-- We specify the Maven compiler plugin as we need to set it to Java 1.8 -->
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
-          <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
+    <plugins>
+      <!-- We specify the Maven compiler plugin as we need to set it to Java 1.8 -->
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
 
-  <profiles>
-    <profile>
-      <id>aot</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.vlkan</groupId>
-            <artifactId>quasar-maven-plugin</artifactId>
-            <version>0.7.2</version>
-            <configuration>
-              <check>true</check>
-              <debug>true</debug>
-              <verbose>true</verbose>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>instrument</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.10</version>
+        <executions>
+          <execution>
+            <id>getClasspathFilenames</id>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId> <!-- Run with "mvn compile maven-dependency-plugin:properties exec:exec" -->
+        <version>1.3.2</version>
+        <configuration>
+          <mainClass>io.vertx.example.sync.fiberhandler.Server</mainClass>
+          <workingDirectory>target/classes</workingDirectory>
+          <executable>java</executable>
+          <arguments>
+            <!-- Debug -->
+            <!-- argument>-Xdebug<argument -->
+            <!-- argument>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005<argument -->
+
+            <!-- Configure memory settings as needed -->
+            <!-- argument>-Xmx1000m</argument -->
+
+            <!--
+                Agent-based runtime instrumentation; use _either_ AoT or agent-based, not both
+            -->
+
+            <!-- Turn off before production -->
+            <argument>-Dco.paralleluniverse.fibers.verifyInstrumentation=true</argument>
+
+            <!-- Quasar Agent for JDK 8 -->
+            <argument>-javaagent:${co.paralleluniverse:quasar-core:jar:jdk8}</argument> <!-- Add "=b" to force instrumenting blocking calls like Thread.sleep() -->
+
+            <!-- Classpath -->
+            <argument>-classpath</argument> <classpath/>
+
+            <!-- Main class -->
+            <argument>io.vertx.example.sync.fiberhandler.Server</argument>
+          </arguments>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
