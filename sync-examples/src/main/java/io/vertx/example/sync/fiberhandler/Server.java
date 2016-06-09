@@ -53,11 +53,6 @@ public class Server extends SyncVerticle {
         vertx.getOrCreateContext().put(FIBER_SCHEDULER_CONTEXT_KEY, new FiberForkJoinScheduler("vertx-sync", Runtime.getRuntime().availableProcessors()));
 
         eb.consumer(ADDRESS).handler(msg -> {
-            o.println("[VertxHandler] StackTrace:");
-            new Throwable().printStackTrace(o);
-            final Object vertxSyncFiberSchedulerAttrValue = vertx.getOrCreateContext().get(FIBER_SCHEDULER_CONTEXT_KEY);
-            printScheduler("[VertxHandler] ", vertxSyncFiberSchedulerAttrValue);
-            o.println("[VertxHandler] replying");
             msg.reply("");
         });
 
